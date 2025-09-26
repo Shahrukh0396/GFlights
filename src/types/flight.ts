@@ -3,6 +3,8 @@
 export interface FlightSearchRequest {
   originLocationCode: string;
   destinationLocationCode: string;
+  originEntityId?: string;
+  destinationEntityId?: string;
   departureDate: string;
   returnDate?: string;
   adults: number;
@@ -117,6 +119,8 @@ export interface Airport {
   name: string;
   detailedName: string;
   id: string;
+  skyId?: string; // Sky ID for flight search (e.g., "LOND", "NYCA")
+  entityId?: string; // Entity ID for flight search (e.g., "27544008")
   self: {
     href: string;
     methods: string[];

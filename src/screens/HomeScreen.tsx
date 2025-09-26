@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   ScrollView,
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 import { useFlight } from '../context/FlightContext';
@@ -20,7 +20,8 @@ type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
-  FlightSearch: undefined;
+  AirportMap: undefined;
+  FlightSearch: { selectedAirports?: { origin?: import('../types/flight').Airport; destination?: import('../types/flight').Airport } };
   FlightResults: { searchRequest: import('../types/flight').FlightSearchRequest };
 };
 
@@ -43,6 +44,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     getPopularRoutes,
     getRecentSearches 
   } = useFlight();
+  const insets = useSafeAreaInsets();
 
   // Load data on component mount
   useEffect(() => {
@@ -97,7 +99,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
@@ -120,7 +122,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </Text>
             <TouchableOpacity 
               style={styles.searchButton}
-              onPress={() => navigation.navigate('FlightSearch')}
+              onPress={() => navigation.navigate('AirportMap')}
             >
               <Text style={styles.searchButtonText}>Start Searching</Text>
             </TouchableOpacity>
@@ -222,7 +224,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../api';
 import {
   FlightSearchRequest,
   FlightSearchResponse,
@@ -11,220 +12,9 @@ import {
 const RECENT_SEARCHES_KEY = '@gflights_recent_searches';
 const POPULAR_ROUTES_KEY = '@gflights_popular_routes';
 
-// For demo purposes, we'll use mock data since Amadeus API requires backend setup
-// In production, you would make actual API calls to your backend
 class FlightService {
-  private baseUrl = 'http://localhost:3000'; // Your backend URL
 
-  // Mock flight search data for demonstration
-  private mockFlightOffers = [
-    {
-      id: '1',
-      source: 'GDS',
-      instantTicketingRequired: false,
-      lastTicketingDate: '2024-12-31',
-      numberOfBookableSeats: 9,
-      itineraries: [
-        {
-          duration: 'PT5H30M',
-          segments: [
-            {
-              departure: {
-                iataCode: 'JFK',
-                terminal: '4',
-                at: '2024-01-15T08:30:00',
-              },
-              arrival: {
-                iataCode: 'LAX',
-                terminal: '1',
-                at: '2024-01-15T11:00:00',
-              },
-              carrierCode: 'AA',
-              number: '100',
-              aircraft: { code: 'B737' },
-              duration: 'PT5H30M',
-              id: '1',
-              numberOfStops: 0,
-              blacklistedInEU: false,
-            },
-          ],
-        },
-      ],
-      price: {
-        currency: 'USD',
-        total: '299.00',
-        base: '250.00',
-        grandTotal: '299.00',
-      },
-      pricingOptions: {
-        fareType: ['PUBLISHED'],
-        includedCheckedBagsOnly: true,
-      },
-      validatingAirlineCodes: ['AA'],
-      travelerPricings: [
-        {
-          travelerId: '1',
-          fareOption: 'STANDARD',
-          travelerType: 'ADULT',
-          price: {
-            currency: 'USD',
-            total: '299.00',
-            base: '250.00',
-            grandTotal: '299.00',
-          },
-          fareDetailsBySegment: [
-            {
-              segmentId: '1',
-              cabin: 'ECONOMY',
-              fareBasis: 'Y',
-              class: 'Y',
-              includedCheckedBags: {
-                quantity: 1,
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: '2',
-      source: 'GDS',
-      instantTicketingRequired: false,
-      lastTicketingDate: '2024-12-31',
-      numberOfBookableSeats: 5,
-      itineraries: [
-        {
-          duration: 'PT6H15M',
-          segments: [
-            {
-              departure: {
-                iataCode: 'JFK',
-                terminal: '1',
-                at: '2024-01-15T14:45:00',
-              },
-              arrival: {
-                iataCode: 'LAX',
-                terminal: '2',
-                at: '2024-01-15T17:00:00',
-              },
-              carrierCode: 'DL',
-              number: '200',
-              aircraft: { code: 'A320' },
-              duration: 'PT6H15M',
-              id: '2',
-              numberOfStops: 0,
-              blacklistedInEU: false,
-            },
-          ],
-        },
-      ],
-      price: {
-        currency: 'USD',
-        total: '349.00',
-        base: '300.00',
-        grandTotal: '349.00',
-      },
-      pricingOptions: {
-        fareType: ['PUBLISHED'],
-        includedCheckedBagsOnly: true,
-      },
-      validatingAirlineCodes: ['DL'],
-      travelerPricings: [
-        {
-          travelerId: '1',
-          fareOption: 'STANDARD',
-          travelerType: 'ADULT',
-          price: {
-            currency: 'USD',
-            total: '349.00',
-            base: '300.00',
-            grandTotal: '349.00',
-          },
-          fareDetailsBySegment: [
-            {
-              segmentId: '2',
-              cabin: 'ECONOMY',
-              fareBasis: 'Y',
-              class: 'Y',
-              includedCheckedBags: {
-                quantity: 1,
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: '3',
-      source: 'GDS',
-      instantTicketingRequired: false,
-      lastTicketingDate: '2024-12-31',
-      numberOfBookableSeats: 7,
-      itineraries: [
-        {
-          duration: 'PT7H45M',
-          segments: [
-            {
-              departure: {
-                iataCode: 'JFK',
-                terminal: '7',
-                at: '2024-01-15T20:15:00',
-              },
-              arrival: {
-                iataCode: 'LAX',
-                terminal: '3',
-                at: '2024-01-16T00:00:00',
-              },
-              carrierCode: 'UA',
-              number: '300',
-              aircraft: { code: 'B787' },
-              duration: 'PT7H45M',
-              id: '3',
-              numberOfStops: 0,
-              blacklistedInEU: false,
-            },
-          ],
-        },
-      ],
-      price: {
-        currency: 'USD',
-        total: '279.00',
-        base: '230.00',
-        grandTotal: '279.00',
-      },
-      pricingOptions: {
-        fareType: ['PUBLISHED'],
-        includedCheckedBagsOnly: true,
-      },
-      validatingAirlineCodes: ['UA'],
-      travelerPricings: [
-        {
-          travelerId: '1',
-          fareOption: 'STANDARD',
-          travelerType: 'ADULT',
-          price: {
-            currency: 'USD',
-            total: '279.00',
-            base: '230.00',
-            grandTotal: '279.00',
-          },
-          fareDetailsBySegment: [
-            {
-              segmentId: '3',
-              cabin: 'ECONOMY',
-              fareBasis: 'Y',
-              class: 'Y',
-              includedCheckedBags: {
-                quantity: 1,
-              },
-            },
-          ],
-        },
-      ],
-    },
-  ];
-
-  // Mock popular routes
+  // Mock popular routes (keeping this for now as it's not in the backend API)
   private mockPopularRoutes: PopularRoute[] = [
     {
       origin: 'JFK',
@@ -271,142 +61,180 @@ class FlightService {
   // Search flights
   async searchFlights(searchRequest: FlightSearchRequest): Promise<FlightSearchResponse> {
     try {
-      // In production, make actual API call to your backend
-      // const response = await fetch(`${this.baseUrl}/flights/search`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(searchRequest),
-      // });
-      // return await response.json();
+      // Convert cabin class to backend format (lowercase with underscores)
+      const convertCabinClass = (travelClass?: string): string => {
+        switch (travelClass?.toUpperCase()) {
+          case 'ECONOMY':
+            return 'economy';
+          case 'PREMIUM_ECONOMY':
+            return 'premium_economy';
+          case 'BUSINESS':
+            return 'business';
+          case 'FIRST':
+            return 'first';
+          default:
+            return 'economy';
+        }
+      };
 
-      // For demo purposes, return mock data
+      // Validate departure date format
+      const departureDate = new Date(searchRequest.departureDate);
+      if (isNaN(departureDate.getTime())) {
+        throw new Error('Invalid departure date format');
+      }
+
+      // Validate required fields - Updated to match backend expectations
+      if (!searchRequest.originLocationCode || !searchRequest.destinationLocationCode) {
+        throw new Error('Origin and destination airport codes are required');
+      }
+      
+      if (!searchRequest.originEntityId || !searchRequest.destinationEntityId) {
+        throw new Error('Origin and destination entity IDs are required. Please select airports from the search results.');
+      }
+
+      // Convert our frontend search request to backend format - Updated to match backend DTO
+      const backendRequest: any = {
+        originSkyId: searchRequest.originLocationCode,
+        destinationSkyId: searchRequest.destinationLocationCode,
+        originEntityId: searchRequest.originEntityId,
+        destinationEntityId: searchRequest.destinationEntityId,
+        departureDate: searchRequest.departureDate,
+        cabinClass: convertCabinClass(searchRequest.travelClass),
+        adults: searchRequest.adults?.toString() || '1',
+        children: searchRequest.children?.toString() || '0',
+        infants: searchRequest.infants?.toString() || '0',
+        sortBy: 'best',
+        currency: searchRequest.currencyCode || 'USD',
+        market: 'en-US',
+        countryCode: 'US'
+      };
+
+      // Only include returnDate if it's provided and not empty
+      if (searchRequest.returnDate && searchRequest.returnDate.trim() !== '') {
+        // Ensure the date is in proper ISO 8601 format (YYYY-MM-DD)
+        const returnDate = new Date(searchRequest.returnDate);
+        if (!isNaN(returnDate.getTime())) {
+          backendRequest.returnDate = searchRequest.returnDate;
+        } else {
+          console.warn('Invalid return date format:', searchRequest.returnDate);
+        }
+      }
+
+      // Debug logging
+      console.log('Sending flight search request to backend:', JSON.stringify(backendRequest, null, 2));
+
+      // Updated to use POST request to /flights/search endpoint
+      const response = await api.post('/flights/search', backendRequest);
+      
+      // Save recent search
       await this.saveRecentSearch(searchRequest);
       
+      // Transform backend response to match our frontend interface
+      // Backend now returns { success: true, data: ... } structure
+      const responseData = response.data.data || [];
+      
       return {
-        data: this.mockFlightOffers,
+        data: responseData,
         meta: {
-          count: this.mockFlightOffers.length,
+          count: responseData.length || 0,
           links: {
-            self: `${this.baseUrl}/flights/search`,
+            self: '/flights/search',
           },
         },
-        dictionaries: {
-          locations: {
-            JFK: { cityCode: 'NYC', countryCode: 'US' },
-            LAX: { cityCode: 'LAX', countryCode: 'US' },
-          },
-          aircraft: {
-            B737: 'Boeing 737',
-            A320: 'Airbus A320',
-            B787: 'Boeing 787',
-          },
-          currencies: {
-            USD: 'US Dollar',
-          },
-          carriers: {
-            AA: 'American Airlines',
-            DL: 'Delta Air Lines',
-            UA: 'United Airlines',
-          },
-        },
+        dictionaries: response.data.dictionaries || {},
       };
     } catch (error: any) {
-      throw new Error(`Flight search failed: ${error.message}`);
+      console.error('Flight search error:', error);
+      if (error.response?.status === 401) {
+        throw new Error('Authentication required. Please login again.');
+      }
+      
+      // Handle backend error response format
+      const errorMessage = error.response?.data?.message || error.message;
+      throw new Error(`Flight search failed: ${errorMessage}`);
     }
   }
 
   // Search airports
   async searchAirports(query: string): Promise<AirportSearchResponse> {
     try {
-      // In production, make actual API call
-      // const response = await fetch(`${this.baseUrl}/airports/search?q=${encodeURIComponent(query)}`);
-      // return await response.json();
-
-      // Mock airport data
-      const mockAirports = [
-        {
-          type: 'airport',
-          subType: 'airport',
-          name: 'John F. Kennedy International Airport',
-          detailedName: 'New York (NYC) - John F. Kennedy International',
-          id: 'JFK',
-          self: {
-            href: 'https://api.amadeus.com/v1/reference-data/locations/JFK',
-            methods: ['GET'],
-          },
-          timeZoneOffset: '-05:00',
-          iataCode: 'JFK',
-          geoCode: {
-            latitude: 40.6413,
-            longitude: -73.7781,
-          },
-          address: {
-            cityName: 'New York',
-            cityCode: 'NYC',
-            countryName: 'United States',
-            countryCode: 'US',
-            regionCode: 'US-NY',
-          },
-          analytics: {
-            travelers: {
-              score: 95,
-            },
-          },
-        },
-        {
-          type: 'airport',
-          subType: 'airport',
-          name: 'Los Angeles International Airport',
-          detailedName: 'Los Angeles (LAX) - Los Angeles International',
-          id: 'LAX',
-          self: {
-            href: 'https://api.amadeus.com/v1/reference-data/locations/LAX',
-            methods: ['GET'],
-          },
-          timeZoneOffset: '-08:00',
-          iataCode: 'LAX',
-          geoCode: {
-            latitude: 33.9416,
-            longitude: -118.4085,
-          },
-          address: {
-            cityName: 'Los Angeles',
-            cityCode: 'LAX',
-            countryName: 'United States',
-            countryCode: 'US',
-            regionCode: 'US-CA',
-          },
-          analytics: {
-            travelers: {
-              score: 92,
-            },
-          },
-        },
-      ];
-
-      const filteredAirports = mockAirports.filter(airport =>
-        airport.name.toLowerCase().includes(query.toLowerCase()) ||
-        airport.iataCode.toLowerCase().includes(query.toLowerCase()) ||
-        airport.address.cityName.toLowerCase().includes(query.toLowerCase())
-      );
+      const response = await api.get('/flights/search-airports', {
+        params: {
+          query: query,
+          locale: 'en-US'
+        }
+      });
 
       return {
-        data: filteredAirports,
+        data: response.data.data || [],
         meta: {
-          count: filteredAirports.length,
+          count: response.data.data?.length || 0,
           links: {
-            self: `${this.baseUrl}/airports/search`,
+            self: '/flights/search-airports',
           },
         },
       };
     } catch (error: any) {
-      throw new Error(`Airport search failed: ${error.message}`);
+      console.error('Airport search error:', error);
+      if (error.response?.status === 401) {
+        throw new Error('Authentication required. Please login again.');
+      }
+      throw new Error(`Airport search failed: ${error.response?.data?.message || error.message}`);
     }
   }
 
-  // Get popular routes
+  // Get nearby airports
+  async getNearbyAirports(lat: number, lng: number, locale: string = 'en-US'): Promise<AirportSearchResponse> {
+    try {
+      const response = await api.get('/flights/nearby-airports', {
+        params: {
+          lat: lat.toString(),
+          lng: lng.toString(),
+          locale: locale
+        }
+      });
+
+      return {
+        data: response.data.data || [],
+        meta: {
+          count: response.data.data?.length || 0,
+          links: {
+            self: '/flights/nearby-airports',
+          },
+        },
+      };
+    } catch (error: any) {
+      console.error('Nearby airports search error:', error, error.response);
+      if (error.response?.status === 401) {
+        throw new Error('Authentication required. Please login again.');
+      }
+      throw new Error(`Nearby airports search failed: ${error.response?.data?.message || error.message}`);
+    }
+  }
+
+  // Get price calendar
+  async getPriceCalendar(originSkyId: string, destinationSkyId: string, fromDate: string, currency: string = 'USD'): Promise<any> {
+    try {
+      const response = await api.get('/flights/price-calendar', {
+        params: {
+          originSkyId,
+          destinationSkyId,
+          fromDate,
+          currency
+        }
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Price calendar error:', error);
+      if (error.response?.status === 401) {
+        throw new Error('Authentication required. Please login again.');
+      }
+      throw new Error(`Price calendar failed: ${error.response?.data?.message || error.message}`);
+    }
+  }
+
+  // Get popular routes (keeping mock data as this endpoint doesn't exist in backend)
   async getPopularRoutes(): Promise<PopularRoute[]> {
     try {
       const stored = await AsyncStorage.getItem(POPULAR_ROUTES_KEY);

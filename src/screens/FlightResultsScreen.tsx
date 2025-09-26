@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useFlight } from '../context/FlightContext';
@@ -42,6 +42,7 @@ interface Props {
 const FlightResultsScreen: React.FC<Props> = ({ navigation, route }) => {
   const { flightOffers, isLoading, searchError, clearSearchResults } = useFlight();
   const [selectedOffer, setSelectedOffer] = useState<FlightOffer | null>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     // Clear results when component unmounts
@@ -175,7 +176,7 @@ const FlightResultsScreen: React.FC<Props> = ({ navigation, route }) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <View style={styles.header}>
           <TouchableOpacity
@@ -191,12 +192,12 @@ const FlightResultsScreen: React.FC<Props> = ({ navigation, route }) => {
           <ActivityIndicator size="large" color="#007AFF" />
           <Text style={styles.loadingText}>Searching for flights...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
       {/* Header */}
@@ -264,7 +265,7 @@ const FlightResultsScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

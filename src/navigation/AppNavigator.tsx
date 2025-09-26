@@ -6,6 +6,7 @@ import LandingScreen from '../screens/LandingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
+import AirportMapScreen from '../screens/AirportMapScreen';
 import FlightSearchScreen from '../screens/FlightSearchScreen';
 import FlightResultsScreen from '../screens/FlightResultsScreen';
 
@@ -14,7 +15,8 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
-  FlightSearch: undefined;
+  AirportMap: undefined;
+  FlightSearch: { selectedAirports?: { origin?: import('../types/flight').Airport; destination?: import('../types/flight').Airport } };
   FlightResults: { searchRequest: import('../types/flight').FlightSearchRequest };
 };
 
@@ -48,6 +50,7 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="AirportMap" component={AirportMapScreen} />
         <Stack.Screen name="FlightSearch" component={FlightSearchScreen} />
         <Stack.Screen name="FlightResults" component={FlightResultsScreen} />
       </Stack.Navigator>

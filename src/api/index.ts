@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configure base URL - update this to your actual API endpoint
-const BASE_URL = 'http://localhost:3000'; // Backend runs on port 3000 without /api prefix
+const BASE_URL = 'http://3.214.204.171:3000'; // Backend runs on port 3000 without /api prefix
 
 // Create axios instance
 const api = axios.create({
